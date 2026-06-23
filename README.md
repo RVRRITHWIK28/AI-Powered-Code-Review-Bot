@@ -107,10 +107,6 @@ pip install -r requirements.txt
 
 Create a `.env` file:
 
-```env
-GEMINI_API_KEY=YOUR_API_KEY
-```
-
 ### Run Application
 
 ```bash
