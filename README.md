@@ -152,10 +152,50 @@ This project demonstrates:
 * Code Complexity Analysis
 
 ---
+
 ## 🚀 Live Demo
 
 https://rvrrithwik28aipoweredcodereviewbot.streamlit.app/
 
+---
+
+# 📸 Application Screenshots
+
+## 🏠 Home Page
+
+![Home](screenshots/home.png)
+
+---
+
+## 📊 Analytics Dashboard
+
+![Analytics](screenshots/analytics-dashboard.png)
+
+---
+
+## 🌍 Programming Language Distribution
+
+![Languages](screenshots/language-distribution.png)
+
+---
+
+## 📈 Code Score Distribution
+
+![Scores](screenshots/score-distribution.png)
+
+---
+
+## 📜 Review History
+
+![History](screenshots/review-history.png)
+
+---
+
+## 🗂 Review Records
+
+![Records](screenshots/review-records.png)
+
+---
 
 # 👨‍💻 Author
 
