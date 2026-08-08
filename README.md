@@ -1,7 +1,6 @@
 # AI-Powered-Code-Review-Bot
 AI-powered code review platform that analyzes source code, detects bugs, evaluates quality, and provides intelligent improvement suggestions using Gemini AI.
 
----
 
 ## 🚀 Live Demo
 
