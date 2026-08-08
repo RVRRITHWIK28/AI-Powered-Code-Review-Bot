@@ -1,6 +1,12 @@
 # AI-Powered-Code-Review-Bot
 AI-powered code review platform that analyzes source code, detects bugs, evaluates quality, and provides intelligent improvement suggestions using Gemini AI.
 
+---
+
+## 🚀 Live Demo
+
+https://rvrrithwik28aipoweredcodereviewbot.streamlit.app/
+
 # 🤖 Overview
 
 An intelligent code analysis platform built with **Python, Streamlit, Gemini AI, SQLite, and Plotly** that automatically reviews source code, detects potential issues, evaluates code quality, and provides actionable improvement suggestions.
@@ -150,12 +156,6 @@ This project demonstrates:
 * Cloud Deployment
 * Advanced Security Audits
 * Code Complexity Analysis
-
----
-
-## 🚀 Live Demo
-
-https://rvrrithwik28aipoweredcodereviewbot.streamlit.app/
 
 ---
 
