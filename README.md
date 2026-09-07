@@ -372,53 +372,6 @@ AI_Code_Review_Bot/
 
 ---
 
-## ⚙️ Local Setup
-
-### 1. Clone the repository
-
-```bash
-git clone <YOUR_GITHUB_REPOSITORY_URL>
-cd AI_Code_Review_Bot
-```
-
-### 2. Create a virtual environment
-
-```bash
-python -m venv .venv
-```
-
-### 3. Activate the environment
-
-Windows:
-
-```powershell
-.venv\Scripts\Activate.ps1
-```
-
-### 4. Install dependencies
-
-```bash
-pip install -r requirements.txt
-```
-
-### 5. Configure the Gemini API key
-
-Create a `.env` file:
-
-```env
-GEMINI_API_KEY=your_api_key_here
-```
-
-**Never commit `.env` or expose your API key publicly.**
-
-### 6. Run the application
-
-```bash
-streamlit run app.py
-```
-
----
-
 ## ☁️ Deployment
 
 The application is deployed using **Streamlit Community Cloud** and connected to the GitHub repository.
