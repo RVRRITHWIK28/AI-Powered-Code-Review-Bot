@@ -1,10 +1,15 @@
 import streamlit as st
 import pandas as pd
+import json
 from datetime import datetime
 import plotly.express as px
 import pandas as pd
 
 from review_engine import review_code
+from project_knowledge import (
+    get_relevant_categories,
+    get_project_knowledge
+)
 from database import (
     init_db,
     save_review,
@@ -436,7 +441,6 @@ if st.session_state.page == "Home":
             ):
 
                 progress = st.progress(0)
-
                 status = st.empty()
 
                 for i in range(100):
@@ -459,30 +463,70 @@ if st.session_state.page == "Home":
                     time.sleep(0.01)
 
                 with st.spinner("Generating AI Review..."):
+                    relevant_categories = get_relevant_categories(code)
 
-                    review = review_code(code)
+                    retrieved_knowledge = get_project_knowledge(
+                        relevant_categories
+                    )
 
-                    if "quota exceeded" in review.lower() or "resource_exhausted" in review.lower():
+                    review = review_code(
+                        code,
+                        return_retrieval=True
+                    )
 
-                        st.error(review)
+                    retrieved_results = review.pop(
+                        "_retrieved_knowledge",
+                        []
+                    )
 
+                with st.expander("🧠 Semantic Retrieval"):
+
+                    st.write("**Top Retrieved Project Rules:**")
+
+                    for i, result in enumerate(
+                        retrieved_results,
+                        start=1
+                    ):
+
+                        st.markdown(
+                            f"### {i}. {result['category'].title()}"
+                        )
+
+                        st.write(
+                            f"**Semantic Similarity:** "
+                            f"{result['similarity']:.4f}"
+                        )
+
+                        st.write(
+                            f"**Hybrid Score:** "
+                            f"{result['score']:.4f}"
+                        )
+
+                        st.info(
+                            f"📚 {result['rule']}"
+                        )
+
+                        st.markdown("---")
+
+                    if "error" in review:
+                        st.error(review["error"])
                         st.stop()
 
-                    score = extract_score(review)
+                    score = review["score"]
 
                     save_review(
                         uploaded_file.name,
                         language,
                         score,
-                        review
+                        json.dumps(review, indent=2)
                     )
 
                     st.session_state.review_result = review
                     st.session_state.code_score = score
 
-                progress.empty()
+                    progress.empty()
 
-                status.success("✅ Review Completed Successfully!")
+                    status.success("✅ Review Completed Successfully!")
 
         except Exception as e:
 
@@ -491,7 +535,13 @@ if st.session_state.page == "Home":
     # REVIEW RESULTS
     # ==========================================================
 
-    if st.session_state.review_result:
+    if st.session_state.review_result is not None:
+
+        review = st.session_state.review_result
+
+        if not isinstance(review, dict):
+            st.error("Invalid review format returned by AI.")
+            st.stop()
 
         st.markdown("<br>", unsafe_allow_html=True)
 
@@ -503,6 +553,42 @@ if st.session_state.page == "Home":
 
         score = st.session_state.code_score
 
+        # ----------------------------------------------------------
+        # REVIEW SUMMARY METRICS
+        # ----------------------------------------------------------
+
+        all_issues = []
+
+        for category in [
+            "bugs",
+            "security",
+            "performance",
+            "best_practices"
+        ]:
+            all_issues.extend(
+                review.get(category, [])
+            )
+
+        critical_count = sum(
+            1 for issue in all_issues
+            if issue.get("severity") == "CRITICAL"
+        )
+
+        high_count = sum(
+            1 for issue in all_issues
+            if issue.get("severity") == "HIGH"
+        )
+
+        medium_count = sum(
+            1 for issue in all_issues
+            if issue.get("severity") == "MEDIUM"
+        )
+
+        low_count = sum(
+            1 for issue in all_issues
+            if issue.get("severity") == "LOW"
+        )
+
         col1, col2, col3, col4 = st.columns(4)
 
         with col1:
@@ -512,102 +598,460 @@ if st.session_state.page == "Home":
             )
 
         with col2:
-
-            if score >= 80:
-                st.success("🚀 Production Ready")
-
-            elif score >= 60:
-                st.warning("⚠ Needs Improvements")
-
-            else:
-                st.error("❌ Major Issues")
+            st.metric(
+                "🔴 Critical",
+                critical_count
+            )
 
         with col3:
             st.metric(
-                "💻 Language",
-                st.session_state.language
+                "🟠 High",
+                high_count
             )
 
         with col4:
             st.metric(
-                "📄 Lines of Code",
-                len(st.session_state.uploaded_code.splitlines())
+                "🟡 Medium",
+                medium_count
             )
+
+        st.markdown("<br>", unsafe_allow_html=True)
+
+        # Additional low-severity information
+        if low_count > 0:
+            st.info(f"🟢 Low Severity Issues: {low_count}")
 
         st.markdown("<br>", unsafe_allow_html=True)
 
         st.subheader("📈 Code Quality")
 
-        st.progress(score / 100)
+        # Score visualization
+        score_col1, score_col2 = st.columns([1, 2])
 
-        if score >= 90:
-            st.success("Excellent code quality.")
+        with score_col1:
 
-        elif score >= 75:
-            st.info("Good implementation with minor improvements.")
-
-        elif score >= 60:
-            st.warning("Moderate quality. Improvements recommended.")
-
-        else:
-            st.error("Poor code quality. Significant improvements required.")
-
-        st.markdown("<br>", unsafe_allow_html=True)
-
-        with st.expander(
-            "📋 AI Review Report",
-            expanded=True
-        ):
-            st.markdown(st.session_state.review_result)
-
-        st.markdown("<br>", unsafe_allow_html=True)
-
-        try:
-
-            pdf_file = generate_pdf(
-                st.session_state.review_result
+            st.metric(
+                "Overall Score",
+                f"{score}/100"
             )
 
-            with open(pdf_file, "rb") as pdf:
+        with score_col2:
 
-                st.download_button(
+            st.progress(score / 100)
 
-                    label="📄 Download PDF Report",
+            if score >= 90:
+                st.success("Excellent code quality.")
 
-                    data=pdf,
+            elif score >= 75:
+                st.info("Good implementation with minor improvements.")
 
-                    file_name="AI_Code_Review_Report.pdf",
+            elif score >= 60:
+                st.warning("Moderate quality. Improvements recommended.")
 
-                    mime="application/pdf",
+            else:
+                st.error("Poor code quality. Significant improvements required.")
 
-                    use_container_width=True
+        st.markdown("<br>", unsafe_allow_html=True)
 
+        # ==========================================================
+        # SEVERITY DISTRIBUTION
+        # ==========================================================
+
+        st.subheader("📊 Severity Distribution")
+
+        severity_data = pd.DataFrame({
+            "Severity": [
+                "Critical",
+                "High",
+                "Medium",
+                "Low"
+            ],
+            "Issues": [
+                critical_count,
+                high_count,
+                medium_count,
+                low_count
+            ]
+        })
+
+        fig = px.bar(
+            severity_data,
+            x="Severity",
+            y="Issues",
+            text="Issues",
+            title="Issues by Severity"
+        )
+
+        fig.update_layout(
+            xaxis_title="Severity",
+            yaxis_title="Number of Issues",
+            showlegend=False
+        )
+
+        st.plotly_chart(
+            fig,
+            width="stretch"
+        )
+
+        st.markdown("<br>", unsafe_allow_html=True)
+
+        # ==========================================================
+        # CATEGORY-WISE ISSUE DISTRIBUTION
+        # ==========================================================
+
+        st.subheader("📂 Issues by Category")
+
+        category_data = pd.DataFrame({
+            "Category": [
+                "Bugs",
+                "Security",
+                "Performance",
+                "Best Practices"
+            ],
+            "Issues": [
+                len(review.get("bugs", [])),
+                len(review.get("security", [])),
+                len(review.get("performance", [])),
+                len(review.get("best_practices", []))
+            ]
+        })
+
+        fig_category = px.bar(
+            category_data,
+            x="Category",
+            y="Issues",
+            text="Issues",
+            title="Issues Detected by Category"
+        )
+
+        fig_category.update_layout(
+            xaxis_title="Category",
+            yaxis_title="Number of Issues",
+            showlegend=False
+        )
+
+        st.plotly_chart(
+            fig_category,
+            width="stretch"
+        )
+
+        st.markdown("<br>", unsafe_allow_html=True)
+
+        # ==========================================================
+        # RAG / PROJECT KNOWLEDGE
+        # ==========================================================
+
+        retrieved_knowledge = review.get(
+            "_retrieved_knowledge",
+            []
+        )
+
+        if retrieved_knowledge:
+
+            st.subheader("🧠 Project Knowledge Used")
+
+            st.caption(
+                "These project-specific rules were retrieved "
+                "and provided as context during the AI review."
+            )
+
+            for index, item in enumerate(
+                retrieved_knowledge,
+                start=1
+            ):
+
+                category = item.get(
+                    "category",
+                    "Unknown"
                 )
 
-        except Exception as e:
+                rule = item.get(
+                    "rule",
+                    ""
+                )
+
+                similarity = item.get(
+                    "similarity",
+                    0
+                )
+
+                hybrid_score = item.get(
+                    "score",
+                    0
+                )
+
+                with st.expander(
+                    f"{index}. {category.replace('_', ' ').title()}"
+                ):
+
+                    st.write(
+                        f"**Rule:** {rule}"
+                    )
+
+                    col1, col2 = st.columns(2)
+
+                    with col1:
+
+                        st.metric(
+                            "Semantic Similarity",
+                            f"{similarity:.3f}"
+                        )
+
+                    with col2:
+
+                        st.metric(
+                            "Hybrid Score",
+                            f"{hybrid_score:.3f}"
+                        )
+
+            st.markdown("<br>", unsafe_allow_html=True)
+
+        # ==========================================================
+        # STRUCTURED AI REVIEW
+        # ==========================================================
+
+        review = st.session_state.review_result
+
+        # ==========================================================
+        # ISSUE FILTERS
+        # ==========================================================
+
+        st.subheader("🔎 Filter Issues")
+
+        filter_col1, filter_col2 = st.columns(2)
+
+        with filter_col1:
+
+            selected_category = st.selectbox(
+                "Category",
+                [
+                    "All",
+                    "Bugs",
+                    "Security",
+                    "Performance",
+                    "Best Practices"
+                ]
+            )
+
+        with filter_col2:
+
+            selected_severity = st.selectbox(
+                "Severity",
+                [
+                    "All",
+                    "CRITICAL",
+                    "HIGH",
+                    "MEDIUM",
+                    "LOW"
+                ]
+            )
+
+        # Collect all issues
+        filtered_issues = []
+
+        category_mapping = {
+            "Bugs": "bugs",
+            "Security": "security",
+            "Performance": "performance",
+            "Best Practices": "best_practices"
+        }
+
+        categories_to_check = (
+            [category_mapping[selected_category]]
+            if selected_category != "All"
+            else [
+                "bugs",
+                "security",
+                "performance",
+                "best_practices"
+            ]
+        )
+
+        for category in categories_to_check:
+
+            for issue in review.get(category, []):
+
+                if (
+                    selected_severity == "All"
+                    or issue.get("severity") == selected_severity
+                ):
+
+                    filtered_issues.append({
+                        "category": category,
+                        "issue": issue
+                    })
+
+        st.caption(
+            f"Showing {len(filtered_issues)} matching issue(s)"
+        )
+
+        # ==========================================================
+        # REVIEW STATUS
+        # ==========================================================
+
+        if len(all_issues) == 0:
+
+            st.success(
+                "✅ No issues were detected. "
+                "Your code passed the AI review."
+            )
+
+        elif critical_count > 0:
+
+            st.error(
+                f"🚨 Review requires attention: "
+                f"{critical_count} critical issue(s) detected."
+            )
+
+        elif high_count > 0:
 
             st.warning(
-                f"Unable to generate PDF: {e}"
+                f"⚠️ Review requires attention: "
+                f"{high_count} high-severity issue(s) detected."
+            )
+
+        else:
+
+            st.info(
+                "ℹ️ Minor improvements are recommended."
             )
 
         st.markdown("<br>", unsafe_allow_html=True)
 
-        st.markdown("""
-        ---
-        <center>
+        # ==========================================================
+        # FILTERED ISSUE RESULTS
+        # ==========================================================
 
-        <span style="color:#94A3B8;">
+        if not filtered_issues:
 
-        🤖 AI-Powered Code Review Bot
+            st.success("🎉 No issues match the selected filters.")
 
-        <br>
+        else:
 
-        Powered by Google Gemini AI • Streamlit • SQLite
+            for item in filtered_issues:
 
-        </span>
+                category = item["category"]
+                issue = item["issue"]
 
-        </center>
-        """, unsafe_allow_html=True)
+                # Category heading
+                if category == "bugs":
+                    category_label = "🐛 Bug"
+
+                elif category == "security":
+                    category_label = "🔐 Security"
+
+                elif category == "performance":
+                    category_label = "⚡ Performance"
+
+                else:
+                    category_label = "📋 Best Practice"
+
+                severity = issue.get("severity", "UNKNOWN")
+                confidence = issue.get("confidence", 0)
+
+                with st.expander(
+                    f"{category_label} — {severity}",
+                    expanded=True
+                ):
+
+                    st.markdown(
+                        f"### {issue.get('issue', 'Issue detected')}"
+                    )
+
+                    col1, col2 = st.columns(2)
+
+                    with col1:
+
+                        if severity == "CRITICAL":
+                            st.error("🔴 CRITICAL")
+
+                        elif severity == "HIGH":
+                            st.warning("🟠 HIGH")
+
+                        elif severity == "MEDIUM":
+                            st.info("🟡 MEDIUM")
+
+                        else:
+                            st.success("🟢 LOW")
+
+                    with col2:
+
+                        st.metric(
+                            "🤖 AI Confidence",
+                            f"{confidence}%"
+                        )
+
+                    if issue.get("evidence"):
+
+                        st.markdown("**🔎 Evidence**")
+
+                        st.code(
+                            issue["evidence"],
+                            language=language.lower()
+                        )
+
+                    if issue.get("explanation"):
+
+                        st.markdown("**💡 Explanation**")
+
+                        st.write(
+                            issue["explanation"]
+                        )
+
+                    if issue.get("suggestion"):
+
+                        st.markdown("**🛠️ Suggested Fix**")
+
+                        st.info(
+                            issue["suggestion"]
+                        )
+
+                try:
+
+                    pdf_file = generate_pdf(
+                        st.session_state.review_result
+                    )
+
+                    with open(pdf_file, "rb") as pdf:
+
+                        st.download_button(
+
+                            label="📄 Download PDF Report",
+
+                            data=pdf,
+
+                            file_name="AI_Code_Review_Report.pdf",
+
+                            mime="application/pdf",
+
+                            use_container_width=True
+
+                        )
+
+                except Exception as e:
+
+                    st.warning(
+                        f"Unable to generate PDF: {e}"
+                    )
+
+                st.markdown("<br>", unsafe_allow_html=True)
+
+                st.markdown("""
+                ---
+                <center>
+
+                <span style="color:#94A3B8;">
+
+                🤖 AI-Powered Code Review Bot
+
+                <br>
+
+                Powered by Google Gemini AI • Streamlit • SQLite
+
+                </span>
+
+                </center>
+                """, unsafe_allow_html=True)
 
 
     # ==========================================================
@@ -922,11 +1366,49 @@ elif st.session_state.page == "Review History":
             ]
         )
 
-        # Search
-        search = st.text_input(
-            "🔍 Search by Filename",
-            placeholder="Example: main.py"
-        )
+        # ==========================================================
+        # REVIEW HISTORY FILTERS
+        # ==========================================================
+
+        filter_col1, filter_col2, filter_col3 = st.columns(3)
+
+        with filter_col1:
+
+            search = st.text_input(
+                "🔍 Search by Filename",
+                placeholder="Example: main.py"
+            )
+
+        with filter_col2:
+
+            languages = ["All"] + sorted(
+                df["Language"]
+                .dropna()
+                .unique()
+                .tolist()
+            )
+
+            selected_language = st.selectbox(
+                "💻 Programming Language",
+                languages
+            )
+
+        with filter_col3:
+
+            score_filter = st.selectbox(
+                "⭐ Score Range",
+                [
+                    "All",
+                    "90–100",
+                    "75–89",
+                    "60–74",
+                    "0–59"
+                ]
+            )
+
+        # ----------------------------------------------------------
+        # Apply filename filter
+        # ----------------------------------------------------------
 
         if search:
 
@@ -938,7 +1420,92 @@ elif st.session_state.page == "Review History":
                 )
             ]
 
+        # ----------------------------------------------------------
+        # Apply language filter
+        # ----------------------------------------------------------
+
+        if selected_language != "All":
+
+            df = df[
+                df["Language"] == selected_language
+            ]
+
+        # ----------------------------------------------------------
+        # Apply score filter
+        # ----------------------------------------------------------
+
+        if score_filter == "90–100":
+
+            df = df[
+                df["Score"].between(90, 100)
+            ]
+
+        elif score_filter == "75–89":
+
+            df = df[
+                df["Score"].between(75, 89)
+            ]
+
+        elif score_filter == "60–74":
+
+            df = df[
+                df["Score"].between(60, 74)
+            ]
+
+        elif score_filter == "0–59":
+
+            df = df[
+                df["Score"].between(0, 59)
+            ]
+        # ==========================================================
+        # SORT REVIEW HISTORY
+        # ==========================================================
+
+        sort_option = st.selectbox(
+            "↕️ Sort Reviews",
+            [
+                "Newest First",
+                "Oldest First",
+                "Highest Score",
+                "Lowest Score"
+            ]
+        )
+
+        if sort_option == "Newest First":
+
+            df = df.sort_values(
+                by="Created At",
+                ascending=False
+            )
+
+        elif sort_option == "Oldest First":
+
+            df = df.sort_values(
+                by="Created At",
+                ascending=True
+            )
+
+        elif sort_option == "Highest Score":
+
+            df = df.sort_values(
+                by="Score",
+                ascending=False
+            )
+
+        elif sort_option == "Lowest Score":
+
+            df = df.sort_values(
+                by="Score",
+                ascending=True
+            )
+
+        st.caption(
+            f"Showing {len(df)} review(s)"
+        )
+
         st.markdown("<br>", unsafe_allow_html=True)
+
+
 
         # -----------------------------------------
         # Summary
@@ -1041,9 +1608,156 @@ elif st.session_state.page == "Review History":
                     f"📋 View AI Review — {row['Filename']}"
                 ):
 
-                    st.markdown(
-                        row["Review"]
-                    )
+                    try:
+
+                        review = json.loads(row["Review"])
+
+                        # ----------------------------------------------------------
+                        # Issue Severity Summary
+                        # ----------------------------------------------------------
+
+                        all_issues = []
+
+                        for category in [
+                            "bugs",
+                            "security",
+                            "performance",
+                            "best_practices"
+                        ]:
+
+                            all_issues.extend(
+                                review.get(category, [])
+                            )
+
+                        critical = sum(
+                            1 for issue in all_issues
+                            if issue.get("severity") == "CRITICAL"
+                        )
+
+                        high = sum(
+                            1 for issue in all_issues
+                            if issue.get("severity") == "HIGH"
+                        )
+
+                        medium = sum(
+                            1 for issue in all_issues
+                            if issue.get("severity") == "MEDIUM"
+                        )
+
+                        low = sum(
+                            1 for issue in all_issues
+                            if issue.get("severity") == "LOW"
+                        )
+
+                        st.markdown(
+                            f"**Issues:** "
+                            f"🔴 {critical} Critical  |  "
+                            f"🟠 {high} High  |  "
+                            f"🟡 {medium} Medium  |  "
+                            f"🟢 {low} Low"
+                        )
+
+                        # -----------------------------
+                        # Score
+                        # -----------------------------
+
+                        review_score = review.get("score", row["Score"])
+
+                        st.metric(
+                            "⭐ Code Quality Score",
+                            f"{review_score}/100"
+                        )
+
+                        st.markdown("---")
+
+                        # -----------------------------
+                        # Review Sections
+                        # -----------------------------
+
+                        sections = [
+                            ("🐛 Bugs", "bugs"),
+                            ("🛡 Security", "security"),
+                            ("⚡ Performance", "performance"),
+                            ("⭐ Best Practices", "best_practices")
+                        ]
+
+                        for section_title, section_key in sections:
+
+                            st.markdown(
+                                f"### {section_title}"
+                            )
+
+                            issues = review.get(
+                                section_key,
+                                []
+                            )
+
+                            if not issues:
+
+                                st.success(
+                                    "No issues found."
+                                )
+
+                            else:
+
+                                for index, issue in enumerate(
+                                    issues,
+                                    start=1
+                                ):
+
+                                    severity = issue.get(
+                                        "severity",
+                                        "UNKNOWN"
+                                    )
+
+                                    confidence = issue.get(
+                                        "confidence",
+                                        0
+                                    )
+
+                                    st.markdown(
+                                        f"**Issue {index} — {severity}**"
+                                    )
+
+                                    st.write(
+                                        f"**Confidence:** {confidence}"
+                                    )
+
+                                    st.write(
+                                        f"**Issue:** {issue.get('issue', '')}"
+                                    )
+
+                                    # Evidence
+                                    if issue.get("evidence"):
+
+                                        st.markdown(
+                                            "**🔎 Evidence from Source Code**"
+                                        )
+
+                                        st.code(
+                                            issue["evidence"]
+                                        )
+
+                                    # Explanation
+                                    st.write(
+                                        f"**Explanation:** "
+                                        f"{issue.get('explanation', '')}"
+                                    )
+
+                                    # Suggested fix
+                                    st.info(
+                                        f"💡 **Suggestion:** "
+                                        f"{issue.get('suggestion', '')}"
+                                    )
+
+                                    st.markdown("---")
+
+                    except Exception:
+
+                        # Backward compatibility for older reviews
+                        st.markdown(
+                            row["Review"]
+                        )
 
                 # Delete
                 delete_left, delete_right = st.columns(
@@ -1069,23 +1783,6 @@ elif st.session_state.page == "Review History":
 
                 st.markdown("---")
 
-        # -----------------------------------------
-        # Table
-        # -----------------------------------------
-
-        if not df.empty:
-
-            st.subheader("📊 Review Records")
-
-            table_df = df.drop(
-                columns=["Review"]
-            )
-
-            st.dataframe(
-                table_df,
-                use_container_width=True,
-                hide_index=True
-            )
 
         # -----------------------------------------
         # Footer
