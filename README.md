@@ -501,7 +501,7 @@ Potential future extensions include:
 
 **Rithwik Ramadugu**
 
-B.Tech | AI / ML / Data Analytics
+B.Tech | AI / ML / Data Analytics / Data Scientist / Data Engineering
 
 ### 🔗 Live Application
 
