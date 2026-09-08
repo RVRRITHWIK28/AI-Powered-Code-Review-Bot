@@ -383,9 +383,9 @@ if st.session_state.page == "Home":
     """, unsafe_allow_html=True)
 
     uploaded_file = st.file_uploader(
-        "",
-        type=["py", "java", "sql", "js", "cpp", "c"],
-        help="Supported: Python, Java, SQL, JavaScript, C, C++"
+    "Upload your source code",
+    type=["py", "java", "js", "cpp", "c", "cs"],
+    label_visibility="collapsed"
     )
 
     if uploaded_file:
@@ -1024,7 +1024,7 @@ if st.session_state.page == "Home":
         if st.button(
             "✨ Generate Improved Code",
             key="generate_improved_code",
-            use_container_width=True
+            width="content"
         ):
 
             with st.spinner(
