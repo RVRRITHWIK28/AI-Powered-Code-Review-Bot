@@ -1,16 +1,18 @@
-🤖 AI-Powered Code Review Bot
+# 🤖 AI-Powered Code Review Bot
 
-An AI-powered code review application that analyzes source code using Google Gemini, retrieves project-specific coding knowledge using RAG and embeddings, validates AI-generated evidence to reduce unsupported findings, and presents the results through an interactive Streamlit dashboard.
-
-🚀 Live Demo
-
-👉 [AI-Powered Code Review Bot · Streamlit] (https://rvrrithwik28aipoweredcodereviewbot.streamlit.app/)
+An AI-powered code review application that analyzes source code using **Google Gemini**, retrieves project-specific coding knowledge using **RAG and embeddings**, validates AI-generated evidence to reduce unsupported findings, generates improved code based on validated findings, and presents the results through an interactive **Streamlit dashboard**.
 
 ---
 
-📌 Overview
+## 🚀 Live Demo
 
-The AI-Powered Code Review Bot is a full-stack GenAI application designed to automate and improve the code review process.
+[**AI-Powered Code Review Bot →**](https://rvrrithwik28aipoweredcodereviewbot.streamlit.app/)
+
+---
+
+## 📌 Overview
+
+The **AI-Powered Code Review Bot** is a full-stack GenAI application designed to automate and improve the code review process.
 
 Users can submit source code and receive a structured review covering:
 
@@ -23,15 +25,15 @@ Users can submit source code and receive a structured review covering:
 - 🔎 Evidence from the submitted source code
 - 🛠️ Recommended fixes
 
-The application combines LLM-based code analysis, Retrieval-Augmented Generation (RAG), embedding-based retrieval, evidence validation, SQLite persistence, PDF reporting, and an interactive Streamlit interface.
+The application combines **LLM-based code analysis, Retrieval-Augmented Generation (RAG), embedding-based retrieval, evidence validation, AI-generated improved code, SQLite persistence, PDF reporting, and an interactive Streamlit interface**.
 
 ---
 
-✨ Key Features
+## ✨ Key Features
 
-🧠 AI-Powered Code Review
+### 🧠 AI-Powered Code Review
 
-Uses Google Gemini to analyze submitted source code and return structured review results.
+Uses **Google Gemini** to analyze submitted source code and return structured review results.
 
 The model evaluates:
 
@@ -45,23 +47,24 @@ The review is returned using a structured JSON schema rather than relying on uns
 
 ---
 
-🎯 Severity & Confidence
+### 🎯 Severity & Confidence
 
 Every detected issue can include:
 
-Field| Description
-Severity| LOW, MEDIUM, HIGH, or CRITICAL
-Confidence| AI confidence score
-Issue| Description of the problem
-Evidence| Code demonstrating the issue
-Explanation| Why the issue matters
-Suggestion| Recommended improvement
+| Field | Description |
+|---|---|
+| Severity | LOW, MEDIUM, HIGH, or CRITICAL |
+| Confidence | AI confidence score |
+| Issue | Description of the problem |
+| Evidence | Code demonstrating the issue |
+| Explanation | Why the issue matters |
+| Suggestion | Recommended improvement |
 
 This makes the output easier to interpret and process programmatically.
 
 ---
 
-🔎 Evidence Validation
+### 🔎 Evidence Validation
 
 The system doesn't blindly trust every AI-generated finding.
 
@@ -73,11 +76,11 @@ The validation process supports:
 - Normalized whitespace matching
 - Removal of unsupported findings
 
-This helps reduce false positives and hallucinated evidence.
+This helps reduce **false positives and hallucinated evidence**.
 
 ---
 
-🧠 RAG / Project Knowledge
+### 🧠 RAG / Project Knowledge
 
 The application includes a project-specific knowledge base containing coding guidelines for areas such as:
 
@@ -86,7 +89,7 @@ The application includes a project-specific knowledge base containing coding gui
 - Best practices
 - Code quality
 
-Knowledge items are converted into embeddings using Gemini Embeddings.
+Knowledge items are converted into embeddings using **Gemini Embeddings**.
 
 The system retrieves relevant knowledge using:
 
@@ -100,7 +103,7 @@ This allows the review engine to use project-specific rules instead of relying e
 
 ---
 
-📊 Interactive Streamlit Dashboard
+### 📊 Interactive Streamlit Dashboard
 
 The application provides an interactive dashboard containing:
 
@@ -119,11 +122,11 @@ The application provides an interactive dashboard containing:
 
 ---
 
-🔍 Issue Filtering
+### 🔍 Issue Filtering
 
 Review findings can be filtered by:
 
-Category
+**Category**
 
 - All
 - Bugs
@@ -131,7 +134,7 @@ Category
 - Performance
 - Best Practices
 
-Severity
+**Severity**
 
 - All
 - Critical
@@ -143,9 +146,9 @@ This allows users to focus on the most important findings.
 
 ---
 
-📜 Review History
+### 📜 Review History
 
-Reviews are persisted using SQLite.
+Reviews are persisted using **SQLite**.
 
 The application provides:
 
@@ -162,7 +165,7 @@ This allows users to compare and revisit previous code reviews.
 
 ---
 
-📄 PDF Reports
+### 📄 PDF Reports
 
 The application can generate PDF reports containing the AI review results.
 
@@ -170,156 +173,159 @@ Reports provide a portable version of the review for sharing or documentation.
 
 ---
 
-🏗️ System Architecture
+## ✨ AI-Generated Improved Code
 
-                         ┌──────────────────────┐
-                         │    Streamlit UI      │
-                         │                      │
-                         │ Dashboard / Filters  │
-                         │ Review History       │
-                         │ PDF Generation       │
-                         └──────────┬───────────┘
-                                    │
-                                    ▼
-                         ┌──────────────────────┐
-                         │    Review Engine      │
-                         │                      │
-                         │ Gemini Code Review   │
-                         │ Structured JSON      │
-                         │ Severity / Confidence│
-                         └──────────┬───────────┘
-                                    │
-                    ┌───────────────┼────────────────┐
-                    │               │                │
-                    ▼               ▼                ▼
-              ┌──────────┐   ┌────────────┐   ┌─────────────┐
-              │   RAG    │   │ Evidence   │   │   SQLite    │
-              │ Retrieval│   │ Validation │   │   History   │
-              └────┬─────┘   └────────────┘   └─────────────┘
-                   │
-                   ▼
-          ┌────────────────────┐
-          │ Gemini Embeddings  │
-          │                    │
-          │ Knowledge Base     │
-          │ Cosine Similarity  │
-          │ Hybrid Ranking     │
-          └────────────────────┘
+The application can generate a complete improved version of the submitted source code based only on **validated review findings**.
+
+Key safeguards include:
+
+- Preserves the original functionality
+- Fixes only validated findings
+- Uses source-code evidence as the source of truth
+- Avoids unrelated refactoring
+- Preserves existing interfaces where possible
+- Returns complete source code
+- Validates generated Python syntax
+- Supports improved-code generation for multiple programming languages
+- Provides side-by-side original and improved code
+- Allows users to download the improved source code
+
+The generated code is designed to make **minimal, targeted changes** rather than performing unrelated modifications.
 
 ---
 
-🔄 Review Workflow
+## 🏗️ System Architecture
 
-User submits source code
+```text
+                    ┌─────────────────────────┐
+                    │      Streamlit UI       │
+                    │       (app.py)          │
+                    └────────────┬────────────┘
+                                 │
+                                 ▼
+                    ┌─────────────────────────┐
+                    │    Code Review Engine   │
+                    │    (review_engine.py)   │
+                    └────────────┬────────────┘
+                                 │
+                 ┌───────────────┼────────────────┐
+                 │               │                │
+                 ▼               ▼                ▼
+        ┌────────────────┐ ┌──────────────┐ ┌───────────────┐
+        │ Gemini LLM     │ │ RAG / Vector │ │ Validation    │
+        │ Code Analysis  │ │ Retrieval    │ │ Engine        │
+        └────────────────┘ └──────────────┘ └───────────────┘
+                 │               │                │
+                 └───────────────┼────────────────┘
+                                 ▼
+                    ┌─────────────────────────┐
+                    │ Structured Review       │
+                    │ JSON Result             │
+                    └────────────┬────────────┘
+                                 │
+                 ┌───────────────┼────────────────┐
+                 │               │                │
+                 ▼               ▼                ▼
+        ┌────────────────┐ ┌──────────────┐ ┌───────────────┐
+        │ Review         │ │ AI-Generated │ │ PDF Report    │
+        │ Dashboard      │ │ Improved Code│ │ Generator     │
+        └────────────────┘ └──────────────┘ └───────────────┘
+                 │               │                │
+                 └───────────────┼────────────────┘
+                                 ▼
+                    ┌─────────────────────────┐
+                    │      SQLite Database    │
+                    │     Review History      │
+                    └─────────────────────────┘
+```
+
+---
+
+## 🔄 Review Workflow
+
+```text
+User uploads source code
           │
           ▼
-Language detection
+Select programming language
           │
           ▼
-Generate query embedding
+Generate code embeddings
           │
           ▼
 Retrieve relevant project knowledge
           │
           ▼
-Send code + relevant knowledge
-to Gemini
+Send code + retrieved knowledge to Gemini
           │
           ▼
 Structured JSON review
           │
           ▼
+Severity + confidence assignment
+          │
+          ▼
 Evidence validation
           │
           ▼
-Validated findings
+Remove unsupported findings
           │
-          ├───────────────┐
-          ▼               ▼
-   Streamlit Dashboard   SQLite
-          │               │
-          ▼               ▼
-      PDF Report     Review History
+          ▼
+Display review dashboard
+          │
+          ├──────────────► Save review to SQLite
+          │
+          ├──────────────► Generate PDF report
+          │
+          └──────────────► Generate improved code
+                                  │
+                                  ▼
+                         Validate generated code
+                                  │
+                                  ▼
+                         Download improved code
+```
 
 ---
 
-🧪 Example
+## 🔍 Example Review
 
-Submitted Code
+### Input
 
+```python
 def get_user(username):
-
     query = "SELECT * FROM users WHERE name = '" + username + "'"
-
     return query
+```
 
-Detected Finding
+### AI Finding
 
+```text
 Category: Security
-
 Severity: CRITICAL
+Confidence: 100%
 
 Issue:
-SQL Injection vulnerability
+SQL Injection vulnerability.
 
 Evidence:
 query = "SELECT * FROM users WHERE name = '" + username + "'"
 
 Explanation:
-User input is directly concatenated into the SQL query.
+User-controlled input is directly concatenated into a SQL query,
+which can allow an attacker to manipulate the query.
 
-Suggested Fix:
-Use parameterized SQL queries instead of string concatenation.
+Suggestion:
+Use parameterized queries instead of string concatenation.
+```
 
-The system also retrieves the relevant project rule:
-
-Use parameterized queries instead of string concatenation for SQL.
-
-The evidence is then validated against the submitted source code before the finding is displayed.
+The evidence validation layer verifies that the reported evidence is actually present in the submitted source code before the finding is displayed.
 
 ---
 
-🛠️ Tech Stack
+## 📁 Project Structure
 
-Frontend
-
-- Streamlit
-- Plotly
-
-AI / GenAI
-
-- Google Gemini
-- Gemini Embeddings
-- Structured JSON generation
-- Retrieval-Augmented Generation (RAG)
-
-Backend
-
-- Python
-- SQLite
-
-Data Processing
-
-- Pandas
-- NumPy
-
-Reporting
-
-- ReportLab
-
-Configuration
-
-- python-dotenv
-
-Deployment
-
-- Streamlit Community Cloud
-- GitHub
-
----
-
-📁 Project Structure
-
+```text
 AI_Code_Review_Bot/
 │
 ├── app.py
@@ -327,11 +333,9 @@ AI_Code_Review_Bot/
 ├── database.py
 ├── report_generator.py
 ├── utils.py
-│
-├── project_knowledge.py
 ├── embeddings.py
 ├── knowledge_store.py
-│
+├── project_knowledge.py
 ├── test_review.py
 ├── requirements.txt
 ├── README.md
@@ -341,157 +345,303 @@ AI_Code_Review_Bot/
 ├── pages/
 ├── database/
 ├── reports/
-└── screenshots/
+├── screenshots/
+│
+└── .env
+```
 
-Core Components
+### Core Files
 
-File| Responsibility
-"app.py"| Streamlit application and UI
-"review_engine.py"| Gemini review engine and validation
-"project_knowledge.py"| Project-specific coding rules
-"embeddings.py"| Gemini embedding generation
-"knowledge_store.py"| Knowledge retrieval and similarity ranking
-"database.py"| SQLite persistence
-"report_generator.py"| PDF report generation
-"utils.py"| Utility functions
-"test_review.py"| Review testing
+| File | Purpose |
+|---|---|
+| `app.py` | Streamlit application and interactive dashboard |
+| `review_engine.py` | Gemini-powered code review, structured analysis, evidence validation, and improved-code generation |
+| `database.py` | SQLite database operations and review history |
+| `report_generator.py` | PDF report generation |
+| `utils.py` | Utility functions |
+| `embeddings.py` | Generates Gemini document and query embeddings |
+| `knowledge_store.py` | Stores and retrieves project knowledge using vector similarity |
+| `project_knowledge.py` | Contains project-specific coding and security rules |
+| `test_review.py` | Testing and validation of the review engine |
+| `requirements.txt` | Python dependencies |
 
----
+## 🛠️ Tech Stack
 
-☁️ Deployment
+### Frontend
+- Streamlit
+- Python
 
-The application is deployed using Streamlit Community Cloud and connected to the GitHub repository.
+### AI / Machine Learning
+- Google Gemini API
+- Gemini 3.5 Flash-Lite
+- Gemini Embedding Model
+- Prompt Engineering
+- Generative AI
+- Natural Language Processing (NLP)
+- Retrieval-Augmented Generation (RAG)
+- Cosine Similarity
 
-Deployment configuration:
+### Code Analysis
+- AI-powered code review
+- Structured JSON output
+- Severity classification
+- Confidence scoring
+- Evidence-based validation
+- False-positive reduction
+- AI-generated improved code
+- Python syntax validation
 
-Repository: AI_Code_Review_Bot
-Branch: main
-Entry point: app.py
+### Data & Storage
+- SQLite
+- Vector embeddings
+- Local project knowledge store
 
-Secrets such as the Gemini API key are configured through the deployment platform rather than committed to the repository.
-
-Streamlit Community Cloud supports deploying directly from GitHub and automatically updating the application when repository changes are pushed.
-
----
-
-🔐 Security
-
-Sensitive configuration is intentionally excluded from version control.
-
-Ignored files include:
-
-.env
-.venv/
-__pycache__/
-reviews.db
-review_report.pdf
-
-The Gemini API key is supplied through environment variables locally and deployment secrets in Streamlit Cloud.
-
----
-
-📈 Project Evolution
-
-V1 — Initial MVP
-
-- Streamlit interface
-- Gemini-powered review
-- SQLite storage
+### Reporting
+- ReportLab
 - PDF report generation
 
-V2.1 — Structured AI Review
+### Development Tools
+- Git
+- GitHub
+- Virtual Environment (`venv`)
+- Python-dotenv
 
-- Native structured JSON output
-- Category-based findings
-- Severity
-- Confidence
-- Evidence
-- Suggestions
-
-V2.3 — RAG
-
-- Project knowledge base
-- Gemini embeddings
-- Cosine similarity
-- Hybrid category-aware retrieval
-
-V2.4 — Review Validation
-
-- Evidence verification
-- Unsupported finding removal
-- False-positive reduction
-- Conservative review behavior
-
-V2.5 — Advanced UI
-
-- Dashboard metrics
-- Severity visualization
-- Category visualization
-- Interactive filtering
-- RAG visibility
-- Professional issue cards
-- Review history filtering
-- Review sorting
-- Severity summaries
-- Evidence history
-- Deployment on Streamlit Community Cloud
+### Deployment
+- Streamlit Community Cloud
 
 ---
 
-🎯 Key Engineering Concepts Demonstrated
+## 📁 Project Structure
 
-This project demonstrates practical experience with:
 
-- Generative AI
-- Large Language Models
-- Structured LLM output
-- Prompt engineering
-- Retrieval-Augmented Generation
-- Vector embeddings
-- Cosine similarity
-- Hybrid information retrieval
-- AI output validation
-- Hallucination / false-positive reduction
-- Python
-- Streamlit
-- SQLite
-- Data visualization
-- PDF generation
-- Git & GitHub
+AI_Code_Review_Bot/
+│
+├── app.py
+├── review_engine.py
+├── database.py
+├── report_generator.py
+├── utils.py
+├── embeddings.py
+├── knowledge_store.py
+├── project_knowledge.py
+├── test_review.py
+├── requirements.txt
+├── README.md
+├── LICENSE
+├── .gitignore
+│
+├── pages/
+├── database/
+├── reports/
+├── screenshots/
+│
+└── .env
+
+### Core Files
+
+| File | Purpose |
+|---|---|
+| `app.py` | Streamlit application and interactive dashboard |
+| `review_engine.py` | Gemini-powered code review, structured analysis, evidence validation, and improved-code generation |
+| `database.py` | SQLite database operations and review history |
+| `report_generator.py` | PDF report generation |
+| `utils.py` | Utility functions |
+| `embeddings.py` | Generates Gemini document and query embeddings |
+| `knowledge_store.py` | Stores and retrieves project knowledge using vector similarity |
+| `project_knowledge.py` | Contains project-specific coding and security rules |
+| `test_review.py` | Testing and validation of the review engine |
+| `requirements.txt` | Python dependencies |
+
+---
+
+## 🚀 Local Setup
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/RVRRITHWIK28/AI-Powered-Code-Review-Bot.git
+cd AI-Powered-Code-Review-Bot
+```
+
+### 2. Create a Virtual Environment
+
+```bash
+python -m venv .venv
+```
+
+### 3. Activate the Environment
+
+Windows:
+
+```bash
+.venv\Scripts\activate
+```
+
+Linux / macOS:
+
+```bash
+source .venv/bin/activate
+```
+
+### 4. Install Dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+### 5. Run the Application
+
+```bash
+streamlit run app.py
+```
+
+The application will open in your browser.
+
+---
+
+## ☁️ Deployment
+
+The application is deployed using **Streamlit Community Cloud**.
+
+### Deployment Configuration
+
+- Repository: `AI-Powered-Code-Review-Bot`
+- Main application: `app.py`
+- Platform: Streamlit Community Cloud
+- API key: stored securely using Streamlit Secrets
+
+---
+
+## 🔐 Security
+
+The project follows several security-focused practices:
+
+- API keys are stored using environment variables or deployment secrets.
+- `.env` is excluded from Git using `.gitignore`.
+- AI findings require supporting evidence from the submitted source code.
+- Unsupported findings are filtered out through evidence validation.
+- The improved-code generator is restricted to validated findings.
+- AI-generated code preserves the original functionality as much as possible.
+- Python improved code is syntax-validated before being returned.
+- No secrets or credentials are intentionally included in the source code.
+
+---
+
+## 📈 Project Evolution
+
+### V1 — Basic AI Code Review
+- Streamlit interface
+- Gemini-powered code analysis
+- Basic issue detection
+- SQLite review storage
+- PDF reports
+
+### V2.1 — Structured AI Review
+- Native JSON response schema
+- Structured issue categories
+- Consistent AI output
+
+### V2.2 — Severity & Confidence
+- LOW / MEDIUM / HIGH / CRITICAL severity
+- AI confidence scores
+- Better prioritization of findings
+
+### V2.3 — RAG / Project Knowledge
+- Gemini embeddings
+- Semantic retrieval
+- Project-specific coding rules
+- Category-aware hybrid retrieval
+
+### V2.4 — Evidence Validation
+- Evidence-based issue validation
+- False-positive reduction
+- Conservative issue filtering
+- Source-code evidence display
+
+### V2.5 — Advanced Streamlit UI
+- KPI dashboard
+- Severity distribution
+- Category-wise analysis
+- Interactive filtering
+- Review history
+- RAG visibility
+- Evidence display
+- Improved user experience
 - Cloud deployment
 
+### V2.6 — AI-Generated Improved Code
+- AI-generated corrected source code
+- Fixes validated findings only
+- Preserves original functionality
+- Minimal code modifications
+- Complete source-code output
+- Python syntax validation
+- Multi-language support
+- Downloadable improved code
+
 ---
 
-🚀 Future Improvements
+## 🧠 Key Engineering Concepts
 
-Potential future extensions include:
+This project demonstrates practical implementation of:
+
+- Generative AI
+- Large Language Models (LLMs)
+- Prompt Engineering
+- Structured AI Output
+- Retrieval-Augmented Generation (RAG)
+- Vector Embeddings
+- Semantic Search
+- Cosine Similarity
+- Hybrid Retrieval
+- AI Evaluation
+- Evidence-Based Validation
+- False-Positive Reduction
+- Code Analysis
+- Software Security
+- Data Persistence
+- Interactive Data Visualization
+- Cloud Deployment
+
+---
+
+## 🔮 Future Improvements
+
+Potential future enhancements include:
 
 - GitHub Pull Request integration
-- Automated PR comments
-- Repository-level code analysis
-- Automated CI/CD code review
-- Additional programming languages
-- Larger vector databases
-- More advanced semantic retrieval
-- Unit-test generation
-- Automatic code-fix suggestions
-- Authentication and user-specific review history
+- Automatic code review on new Pull Requests
+- Line-level code comments
+- Support for additional programming languages
+- Advanced AST-based code analysis
+- Automated test generation
+- Code quality metrics
+- CI/CD integration
+- Team-based review dashboards
+- Review analytics and trends
+- Authentication and user management
 
 ---
 
-👨‍💻 Author
+## 👨‍💻 Author
 
-Rithwik Ramadugu
+**RVR Rithwik**
 
-B.Tech | AI / ML / Data Analytics / Data Scientist / Data Engineering
-
-🔗 Live Application
-
-"AI-Powered Code Review Bot" (https://rvrrithwik28aipoweredcodereviewbot.streamlit.app/)
+B.Tech | AI / ML / Data Analytics / Data Science / Data Engineering
 
 ---
 
-⭐ Project Status
+## 🌐 Final Project Status
+
+**V2.6 — AI-Powered Code Review + RAG + Evidence Validation + AI-Generated Improved Code + Advanced Streamlit UI + Cloud Deployment**
+
+## 🚀 Live Application
+
+[**AI-Powered Code Review Bot**](https://rvrrithwik28aipoweredcodereviewbot.streamlit.app/)
+
+## 📦 GitHub Repository
+
+[**AI-Powered-Code-Review-Bot**](https://github.com/RVRRITHWIK28/AI-Powered-Code-Review-Bot)
 
 V2.5 — Advanced Streamlit UI + RAG + Evidence Validation + Cloud Deployment
 
