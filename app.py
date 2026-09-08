@@ -5,7 +5,7 @@ from datetime import datetime
 import plotly.express as px
 import pandas as pd
 
-from review_engine import review_code
+from review_engine import review_code, generate_improved_code
 from project_knowledge import (
     get_relevant_categories,
     get_project_knowledge
@@ -51,7 +51,8 @@ defaults = {
     "code_score": 0,
     "uploaded_code": "",
     "file_name": "",
-    "language": ""
+    "language": "",
+    "improved_code_result": None
 }
 
 for key, value in defaults.items():
@@ -429,7 +430,7 @@ if st.session_state.page == "Home":
 
             st.code(
                 code,
-                language=language.lower(),
+                language=st.session_state.language.lower(),
                 line_numbers=True
             )
 
@@ -987,7 +988,7 @@ if st.session_state.page == "Home":
 
                         st.code(
                             issue["evidence"],
-                            language=language.lower()
+                            language=st.session_state.language.lower()
                         )
 
                     if issue.get("explanation"):
@@ -1005,54 +1006,174 @@ if st.session_state.page == "Home":
                         st.info(
                             issue["suggestion"]
                         )
+        # ==========================================================
+        # V2.6 — AI-GENERATED IMPROVED CODE
+        # ==========================================================
 
-                try:
+        st.markdown("<br>", unsafe_allow_html=True)
 
-                    pdf_file = generate_pdf(
-                        st.session_state.review_result
+        st.markdown(
+            "**✨ AI-Generated Improved Code**"
+        )
+
+        st.caption(
+            "Generate an improved version of the submitted code "
+            "based on the validated AI review findings."
+        )
+
+        if st.button(
+            "✨ Generate Improved Code",
+            key="generate_improved_code",
+            use_container_width=True
+        ):
+
+            with st.spinner(
+                "🧠 Gemini is generating the improved code..."
+            ):
+
+                improved_result = generate_improved_code(
+                    st.session_state.uploaded_code,
+                    review,
+                    st.session_state.language
+                )
+
+            st.session_state.improved_code_result = improved_result
+
+
+        # ==========================================================
+        # DISPLAY IMPROVED CODE
+        # ==========================================================
+
+        improved_result = st.session_state.improved_code_result
+
+        if improved_result:
+
+            if "error" in improved_result:
+
+                st.error(
+                    improved_result["error"]
+                )
+
+            else:
+
+                improved_code = improved_result.get(
+                    "improved_code",
+                    ""
+                )
+
+                changes = improved_result.get(
+                    "changes",
+                    []
+                )
+
+                st.success(
+                    "✅ Improved code generated successfully!"
+                )
+
+                # --------------------------------------------------
+                # Original vs Improved Code
+                # --------------------------------------------------
+
+                original_col, improved_col = st.columns(2)
+
+                with original_col:
+
+                    st.markdown(
+                        "**📄 Original Code**"
                     )
 
-                    with open(pdf_file, "rb") as pdf:
+                    st.code(
+                        st.session_state.uploaded_code,
+                        language=st.session_state.language.lower(),
+                        line_numbers=True
+                    )
 
-                        st.download_button(
+                with improved_col:
 
-                            label="📄 Download PDF Report",
+                    st.markdown(
+                        "**✨ Improved Code**"
+                    )
 
-                            data=pdf,
+                    st.code(
+                        improved_code,
+                        language=st.session_state.language.lower(),
+                        line_numbers=True
+                    )
 
-                            file_name="AI_Code_Review_Report.pdf",
+                # --------------------------------------------------
+                # Download Improved Code
+                # --------------------------------------------------
 
-                            mime="application/pdf",
+                st.download_button(
+                    label="⬇️ Download Improved Code",
+                    data=improved_code,
+                    file_name=f"improved_{st.session_state.file_name}",
+                    mime="text/plain",
+                    use_container_width=True,
+                    key="download_improved_code"
+                )
 
-                            use_container_width=True
+                # --------------------------------------------------
+                # Changes Made
+                # --------------------------------------------------
 
+                if changes:
+
+                    st.markdown(
+                        "**📝 Changes Made**"
+                    )
+
+                    for change in changes:
+
+                        st.markdown(
+                            f"- {change}"
                         )
 
-                except Exception as e:
 
-                    st.warning(
-                        f"Unable to generate PDF: {e}"
-                    )
+        # ==========================================================
+        # PDF REPORT
+        # ==========================================================
 
-                st.markdown("<br>", unsafe_allow_html=True)
+        try:
 
-                st.markdown("""
-                ---
-                <center>
+            pdf_file = generate_pdf(
+                st.session_state.review_result
+            )
 
-                <span style="color:#94A3B8;">
+            with open(pdf_file, "rb") as pdf:
 
-                🤖 AI-Powered Code Review Bot
+                st.download_button(
+                    label="📄 Download PDF Report",
+                    data=pdf,
+                    file_name="AI_Code_Review_Report.pdf",
+                    mime="application/pdf",
+                    use_container_width=True
+                )
 
-                <br>
+        except Exception as e:
 
-                Powered by Google Gemini AI • Streamlit • SQLite
+            st.warning(
+                f"Unable to generate PDF: {e}"
+            )
 
-                </span>
+        st.markdown("<br>", unsafe_allow_html=True)
 
-                </center>
-                """, unsafe_allow_html=True)
+        st.markdown("""
+        ---
+        <center>
 
+        <span style="color:#94A3B8;">
+
+        🤖 AI-Powered Code Review Bot
+
+        <br>
+
+        Powered by Google Gemini AI • Streamlit • SQLite
+
+        </span>
+
+        </center>
+        """, unsafe_allow_html=True)
 
     # ==========================================================
     # ANALYTICS PAGE
