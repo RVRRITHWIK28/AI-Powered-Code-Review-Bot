@@ -4,7 +4,7 @@ An AI-powered code review application that analyzes source code using Google Gem
 
 🚀 Live Demo
 
-👉 "AI-Powered Code Review Bot · Streamlit" (https://rvrrithwik28aipoweredcodereviewbot.streamlit.app/)
+👉 [AI-Powered Code Review Bot · Streamlit] (https://rvrrithwik28aipoweredcodereviewbot.streamlit.app/)
 
 ---
 
