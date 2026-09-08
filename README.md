@@ -625,7 +625,7 @@ Potential future enhancements include:
 
 ## 👨‍💻 Author
 
-**RVR Rithwik**
+**Ramadugu Venkata Rama Rithwik**
 
 B.Tech | AI / ML / Data Analytics / Data Science / Data Engineering
 
@@ -638,10 +638,6 @@ B.Tech | AI / ML / Data Analytics / Data Science / Data Engineering
 ## 🚀 Live Application
 
 [**AI-Powered Code Review Bot**](https://rvrrithwik28aipoweredcodereviewbot.streamlit.app/)
-
-## 📦 GitHub Repository
-
-[**AI-Powered-Code-Review-Bot**](https://github.com/RVRRITHWIK28/AI-Powered-Code-Review-Bot)
 
 V2.5 — Advanced Streamlit UI + RAG + Evidence Validation + Cloud Deployment
 
